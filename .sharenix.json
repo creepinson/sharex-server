@@ -1,0 +1,19 @@
+{
+    "DefaultFileUploader": "example.com",
+    "DefaultImageUploader": "example.com",
+    "DefaultUrlShortener": "waa.ai",
+
+    "Services": [
+	      {
+ 	          "Name": "example.com",
+           "DestinationType": "ImageUploader, FileUploader",
+           "RequestType": "GET",
+           "RequestURL": "https://example.com/upload.php?key=YOURAPIKEY",
+           "FileFormName": "image",
+           "ResponseType": "Text",
+           "URL": "$json:data.link$",
+           "ThumbnailURL": "",
+           "DeletionURL": "$json:file.delete_url$"
+        }
+    ]
+}
