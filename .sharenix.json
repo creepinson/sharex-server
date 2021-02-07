@@ -1,13 +1,11 @@
 {
     "DefaultFileUploader": "example.com",
     "DefaultImageUploader": "example.com",
-    "DefaultUrlShortener": "waa.ai",
-
     "Services": [
 		{
  	       	"Name": "example.com",
            	"DestinationType": "ImageUploader, FileUploader",
-           	"RequestType": "GET",
+           	"RequestType": "POST",
            	"RequestURL": "https://example.com/upload.php?key=YOURAPIKEY",
            	"FileFormName": "image",
            	"ResponseType": "Text",

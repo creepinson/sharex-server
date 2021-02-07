@@ -1,0 +1,15 @@
+{
+    "name": "theo/sharex-server",
+    "description": "sharex php server",
+    "type": "project",
+    "license": "GPL-v3.0-or-later",
+    "authors": [
+        {
+            "name": "Theo Paris",
+            "email": "theoparisdesigns@gmail.com"
+        }
+    ],
+    "require": {
+        "dallgoot/yaml": "^0.3.2"
+    }
+}

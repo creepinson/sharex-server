@@ -1,27 +1,10 @@
 <?php
 // Description: Dumb uploader for flameshot software fork.
 // https://github.com/seamus-45/flameshot/tree/custom-upload-hosting
-
-// Settings
-$basePath = 'files';
-
-$str = file_get_contents("config.json");
-$config = json_decode($str, true);
-
-$config["base_url"] = "https://".$_SERVER['SERVER_NAME']."/".$basePath."/";
-$config['max_upload_size'] = 16*1024*1024;
-$config['upload_path'] = "./" . $basePath;
-$config["shorten_url"] = true;
-$config['allowed_exts'] = [
-    'jpg' => 'image/jpeg',
-    'png' => 'image/png',
-    'json' => 'application/json',
-    'gif' => 'image/gif',
-    'mp4' => 'video/mp4',
-];
-
+include "./lib/config.php";
 // Creates a short link by creating an actual symlink
-function get_short_link($sha1, $ext) {
+function get_short_link($sha1, $ext)
+{
     $link_size = 6;
     $full = $sha1;
     $short = substr($sha1, 0, $link_size);
@@ -32,7 +15,7 @@ function get_short_link($sha1, $ext) {
 
     while ((false != $link) && (basename($link) != $full)) {
         $link_size += 1;
-        $short = substr($sha1, 0, $link_size).'.'.$ext;
+        $short = substr($sha1, 0, $link_size) . '.' . $ext;
         $link = readlink($short);
     }
     if ($link == false) {
@@ -42,7 +25,8 @@ function get_short_link($sha1, $ext) {
 }
 
 // Upload file
-function uploadfile($file, $config) {
+function uploadfile($file, $config)
+{
     // Check error value.
     switch ($file['error']) {
         case UPLOAD_ERR_OK:
@@ -65,7 +49,7 @@ function uploadfile($file, $config) {
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     if (false === $ext = array_search(
         $finfo->file($file['tmp_name']),
-        $config['allowed_exts'],
+        $config->allowed_exts,
         true
     )) {
         //throw new RuntimeException('Invalid file format.');
@@ -74,11 +58,12 @@ function uploadfile($file, $config) {
     // Obtain safe unique name from its binary data.
     $sha1 = sha1_file($file['tmp_name']);
     $finalname = $sha1;
+    print($config["upload_path"] . "/" . $finalname);
 
     // Move file to final location
     if (!move_uploaded_file(
         $file['tmp_name'],
-        $finalname
+        $config["upload_path"] . "/" . $finalname
     )) {
         throw new RuntimeException('Failed to move uploaded file.');
     }
@@ -88,20 +73,20 @@ function uploadfile($file, $config) {
         $finalname = get_short_link($sha1, $ext);
     }
 
-    return [ 'name'=>$file['name'], 'link'=> $config['base_url'].$finalname, 'hash'=>$sha1, 'size'=>$file['size'] ];
+    return ['name' => $file['name'], 'link' => $config['base_url'] . $finalname, 'hash' => $sha1, 'size' => $file['size']];
 }
 
 // Main
 header('Content-Type:  application/json; charset=utf-8');
 $answer = [];
 
-$upload_path = realpath($config['upload_path']).DIRECTORY_SEPARATOR;
+$upload_path = realpath($config['upload_path']) . DIRECTORY_SEPARATOR;
 chdir($upload_path);
 
 try {
     // Make some checks
     if (
-	!isset($_FILES["image"]["error"]) ||
+        !isset($_FILES["image"]["error"]) ||
         !is_array($_FILES["image"])
     ) {
         throw new RuntimeException('Invalid parameters.');
@@ -109,15 +94,13 @@ try {
 
     $key = $_GET['key'];
 
-    if (!isset($key) || $key === '' || !in_array($key, $config['keys'])) {
+    if (!isset($key) || $key === '' || !in_array($key, $config->keys)) {
         throw new RuntimeException('Invalid api key.');
     }
-
     $result = uploadfile($_FILES['image'], $config);
 
     $answer['success'] = true;
     $answer['data'] = $result;
-
 } catch (RuntimeException $e) {
 
     $answer['success'] = false;
@@ -126,7 +109,4 @@ try {
     http_response_code(400);
 }
 
-print(preg_replace('/\\\"/',"\"", json_encode($answer)));
-
-?>
-
+print(preg_replace('/\\\"/', "\"", json_encode($answer)));

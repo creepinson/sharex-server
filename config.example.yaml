@@ -1,0 +1,8 @@
+keys:
+    - "1234"
+allowed_exts:
+    jpg: "image/jpeg"
+    png: "image/png"
+    gif: "image/gif"
+shorten_url: false
+base_path: "uploads"
